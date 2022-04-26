@@ -1,5 +1,5 @@
-import { Alert, StyleSheet, Text, View } from 'react-native';
-import React from 'react';
+import { Alert, Image, StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
 import OutlinedButton from '../UI/OutlinedButton';
 import { Colors } from '../../constants/Colors';
 import {
@@ -7,10 +7,16 @@ import {
   useForegroundPermissions,
   PermissionStatus,
 } from 'expo-location';
+import { getMapPreview } from '../../utils/location';
 
 type Props = {};
 
 const LocationPicker = (props: Props) => {
+  const [pickedLocation, setPickedLocation] = useState({
+    lat: 0,
+    lng: 0,
+  });
+
   const [locationPermissionInformation, requestPermission] =
     useForegroundPermissions();
 
@@ -37,18 +43,36 @@ const LocationPicker = (props: Props) => {
     }
 
     const userLocation = await getCurrentPositionAsync();
-    console.log(userLocation);
+    setPickedLocation({
+      lat: userLocation.coords.latitude,
+      lng: userLocation.coords.longitude,
+    });
+
+    console.log(pickedLocation);
   };
   const pickOnMapHandler = async () => {};
 
+  let locationPreview = <Text>No location picked yet.</Text>;
+
+  if (pickedLocation) {
+    locationPreview = (
+      <Image
+        style={styles.image}
+        source={{
+          uri: getMapPreview(pickedLocation.lat, pickedLocation.lng),
+        }}
+      />
+    );
+  }
+
   return (
     <View>
-      <View style={styles.mapPreview}></View>
+      <View style={styles.mapPreview}>{locationPreview}</View>
       <View style={styles.actions}>
-        <OutlinedButton onPress={getLocationHandler} icon={'location'}>
-          My Location
+        <OutlinedButton icon="location" onPress={getLocationHandler}>
+          Locate User
         </OutlinedButton>
-        <OutlinedButton onPress={pickOnMapHandler} icon={'map'}>
+        <OutlinedButton icon="map" onPress={pickOnMapHandler}>
           Pick on Map
         </OutlinedButton>
       </View>
@@ -67,10 +91,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: Colors.primary100,
     borderRadius: 4,
+    overflow: 'hidden',
   },
   actions: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
   },
+  image: { width: '100%', height: '100%' },
 });

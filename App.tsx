@@ -14,6 +14,7 @@ export default function App() {
     <>
       <StatusBar style="dark" />
       <NavigationContainer>
+        {/* @ts-ignore */}
         <Stack.Navigator
           screenOptions={{
             headerStyle: { backgroundColor: Colors.primary500 },
